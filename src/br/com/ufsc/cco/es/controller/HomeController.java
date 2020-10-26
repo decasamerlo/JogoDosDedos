@@ -10,7 +10,12 @@ import java.util.logging.Logger;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+
+import br.com.ufsc.cco.es.model.Arena;
+import br.com.ufsc.cco.es.model.Jogador;
+import br.com.ufsc.cco.es.rede.AtorNetgames;
 
 public class HomeController {
 
@@ -24,40 +29,58 @@ public class HomeController {
 		return homeController;
 	}
 
-	public Component getPanel(JPanel cards, JFrame frame) {
+	public Component getPanel(JPanel cards, JFrame frame, Arena arena) {
 		JPanel panel = new JPanel();
 
-		JButton button1 = new JButton("CONECTAR");
-		button1.addActionListener(new ActionListener() {
+		JButton buttonConectar = new JButton("CONECTAR");
+		buttonConectar.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				CardLayout cl = (CardLayout)(cards.getLayout());
-				cl.show(cards, "CONNECT");
+				String nome = JOptionPane.showInputDialog(null, "Digite seu nome", "Nome", JOptionPane.QUESTION_MESSAGE);
+				if (nome != null) {
+					Jogador jogador = new Jogador(nome);
+					String servidor = JOptionPane.showInputDialog(null, "Digite o servidor", "Servidor", JOptionPane.QUESTION_MESSAGE);
+					MainController.getInstance().conectarJogador(servidor, jogador);
+				}
 			}
 		});
 
-		JButton button2 = new JButton("JOGAR");
-		button2.addActionListener(new ActionListener() {
+		JButton buttonDesconectar = new JButton("DESCONECTAR");
+		buttonDesconectar.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				CardLayout cl = (CardLayout)(cards.getLayout());
-				cl.show(cards, "GAME");
+				MainController.getInstance().desconectar();
 			}
 		});
 
-		JButton button3 = new JButton("SAIR");
-		button3.addActionListener(new ActionListener() {
+		JButton buttonJogar = new JButton("JOGAR");
+		buttonJogar.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				String jogadores = JOptionPane.showInputDialog(null, "Digite o número de jogadores", "Jogadores", JOptionPane.QUESTION_MESSAGE);
+				JOptionPane.showMessageDialog(null, AtorNetgames.getInstance().iniciarPartida(new Integer(jogadores)));
+//				CardLayout cl = (CardLayout)(cards.getLayout());
+//				cl.show(cards, "GAME");
+			}
+		});
+
+		JButton buttonSair = new JButton("SAIR");
+		buttonSair.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				logger.log(Level.INFO, "Saindo...");
 				frame.dispose();
 			}
 		});
-
+		
 		panel.setBackground(Color.CYAN);
-		panel.add(button1);
-		panel.add(button2);
-		panel.add(button3);
+		if (MainController.getInstance().isConectado()) {
+			panel.add(buttonJogar);
+			panel.add(buttonDesconectar);
+		} else {
+			panel.add(buttonConectar);
+		}
+		panel.add(buttonSair);
 
 		return panel;
 	}
