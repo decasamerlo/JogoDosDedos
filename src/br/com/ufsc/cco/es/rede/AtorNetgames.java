@@ -1,11 +1,16 @@
 package br.com.ufsc.cco.es.rede;
 
+import java.util.List;
+
+import br.com.ufsc.cco.es.controller.MainController;
+import br.com.ufsc.cco.es.model.Move;
 import br.ufsc.inf.leobr.cliente.Jogada;
 import br.ufsc.inf.leobr.cliente.OuvidorProxy;
 import br.ufsc.inf.leobr.cliente.Proxy;
 import br.ufsc.inf.leobr.cliente.exception.ArquivoMultiplayerException;
 import br.ufsc.inf.leobr.cliente.exception.JahConectadoException;
 import br.ufsc.inf.leobr.cliente.exception.NaoConectadoException;
+import br.ufsc.inf.leobr.cliente.exception.NaoJogandoException;
 import br.ufsc.inf.leobr.cliente.exception.NaoPossivelConectarException;
 
 public class AtorNetgames implements OuvidorProxy {
@@ -65,37 +70,46 @@ public class AtorNetgames implements OuvidorProxy {
 
 	@Override
 	public void finalizarPartidaComErro(String message) {
-		// TODO Auto-generated method stub
-
+		System.out.println("Finalizando partida com erro: " + message);
 	}
 
 	@Override
 	public void receberMensagem(String msg) {
-		// TODO Auto-generated method stub
+		System.out.println("Recebendo Mensagem: " + msg);
 	}
 
 	@Override
 	public void receberJogada(Jogada jogada) {
-		// TODO Auto-generated method stub
-
+		Move move = (Move) jogada;
+		System.out.println("Recebendo jogada");
+		MainController.getInstance().getArena().efetuaDivisaoDedos(move.getMaoOrigem(), move.getMaoDestino());
+		MainController.getInstance().getArena().passarTurno();
+		MainController.getInstance().refresh();
 	}
 
 	@Override
 	public void tratarConexaoPerdida() {
-		// TODO Auto-generated method stub
-
+		System.out.println("Tratando Conexao Perdida");
 	}
 
 	@Override
 	public void tratarPartidaNaoIniciada(String message) {
-		// TODO Auto-generated method stub
-
+		System.out.println("Tratando partida não iniciada: " + message);
 	}
 
 	@Override
 	public void iniciarNovaPartida(Integer posicao) {
-		// TODO Auto-generated method stub
-		
+		List<String> adversarios = proxy.obterNomeAdversarios();
+		MainController.getInstance().getArena().iniciarNovaPartida(posicao, adversarios);
+		MainController.getInstance().showGame();
+	}
+	
+	public String getNomeAdversario(Integer posicao) {
+		return proxy.obterNomeAdversario(posicao);
+	}
+	
+	public void enviaJogada(Jogada jogada) throws NaoJogandoException {
+		proxy.enviaJogada(jogada);
 	}
 
 }
