@@ -10,8 +10,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map.Entry;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
@@ -75,7 +73,7 @@ public class GameController {
 		label.setHorizontalAlignment(JLabel.CENTER);
 
 		try {
-			BufferedImage imgLeftHand = ImageIO.read(new File("src/resources/images/left_1.jpg"));
+			BufferedImage imgLeftHand = ImageIO.read(ClassLoader.getSystemResource("left_1.jpg"));
 			btnLeftHand = new JButton(new ImageIcon(imgLeftHand));
 			btnLeftHand.setBackground(Color.GRAY);
 			btnLeftHand.addActionListener(new ActionListener() {
@@ -108,7 +106,7 @@ public class GameController {
 				}
 			});
 
-			BufferedImage imgRightHand = ImageIO.read(new File("src/resources/images/right_1.jpg"));
+			BufferedImage imgRightHand = ImageIO.read(ClassLoader.getSystemResource("right_1.jpg"));
 			btnRightHand = new JButton(new ImageIcon(imgRightHand));
 			btnRightHand.setBackground(Color.GRAY);
 			btnRightHand.addActionListener(new ActionListener() {
@@ -149,7 +147,7 @@ public class GameController {
 			for (Jogador jogador : MainController.getInstance().getArena().getMesa()) {
 				if (jogador.getNome() != MainController.getInstance().getJogadorLocal().getNome()) {
 					JPanel oponente = new JPanel();
-					BufferedImage imgOpponentLeftHand = ImageIO.read(new File("src/resources/images/opp_left_1.jpg"));
+					BufferedImage imgOpponentLeftHand = ImageIO.read(ClassLoader.getSystemResource("opp_left_1.jpg"));
 					JButton btnOponentLeftHand = new JButton(new ImageIcon(imgOpponentLeftHand));
 					btnOponentLeftHand.setBackground(Color.GRAY);
 					btnOponentLeftHand.addActionListener(new ActionListener() {
@@ -184,7 +182,7 @@ public class GameController {
 					});
 					listMaoEsquerdaOponentes.put(jogador.getOrdem(), btnOponentLeftHand);
 
-					BufferedImage imgOpponentRightHand = ImageIO.read(new File("src/resources/images/opp_right_1.jpg"));
+					BufferedImage imgOpponentRightHand = ImageIO.read(ClassLoader.getSystemResource("opp_right_1.jpg"));
 					JButton btnOponentRightHand = new JButton(new ImageIcon(imgOpponentRightHand));
 					btnOponentRightHand.setBackground(Color.GRAY);
 					btnOponentRightHand.addActionListener(new ActionListener() {
@@ -244,6 +242,8 @@ public class GameController {
 			panel.add(BorderLayout.CENTER, main);
 		} catch (IOException e1) {
 			e1.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 
 		return panel;
@@ -266,18 +266,18 @@ public class GameController {
 
 		try {
 			int dedosEsquerda = MainController.getInstance().getJogadorLocal().getMaoEsquerda().getDedos();
-			BufferedImage imgLeftHand = ImageIO.read(new File("src/resources/images/left_" + dedosEsquerda + ".jpg"));
+			BufferedImage imgLeftHand = ImageIO.read(ClassLoader.getSystemResource("left_" + dedosEsquerda + ".jpg"));
 			btnLeftHand.setIcon(new ImageIcon(imgLeftHand));
 
 			int dedosDireita = MainController.getInstance().getJogadorLocal().getMaoDireita().getDedos();
-			BufferedImage imgRightHand = ImageIO.read(new File("src/resources/images/right_" + dedosDireita + ".jpg"));
+			BufferedImage imgRightHand = ImageIO.read(ClassLoader.getSystemResource("right_" + dedosDireita + ".jpg"));
 			btnRightHand.setIcon(new ImageIcon(imgRightHand));
 
 			for (Entry<Integer, JButton> entry : listMaoEsquerdaOponentes.entrySet()) {
 				Jogador j = MainController.getInstance().getArena().getJogador(entry.getKey());
 				int dedosOppEsquerda = j.getMaoEsquerda().getDedos();
 				BufferedImage imgOppLeftHand = ImageIO
-						.read(new File("src/resources/images/opp_left_" + dedosOppEsquerda + ".jpg"));
+						.read(ClassLoader.getSystemResource("opp_left_" + dedosOppEsquerda + ".jpg"));
 				entry.getValue().setIcon(new ImageIcon(imgOppLeftHand));
 			}
 
@@ -285,7 +285,7 @@ public class GameController {
 				Jogador j = MainController.getInstance().getArena().getJogador(entry.getKey());
 				int dedosOppDireita = j.getMaoDireita().getDedos();
 				BufferedImage imgOppRightHand = ImageIO
-						.read(new File("src/resources/images/opp_right_" + dedosOppDireita + ".jpg"));
+						.read(ClassLoader.getSystemResource("opp_right_" + dedosOppDireita + ".jpg"));
 				entry.getValue().setIcon(new ImageIcon(imgOppRightHand));
 			}
 		} catch (IOException e) {
