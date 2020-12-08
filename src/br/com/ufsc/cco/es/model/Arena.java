@@ -19,6 +19,7 @@ public class Arena {
 		this.mesa = new ArrayList<Jogador>();
 	}
 
+	// abaixo esta implementado o diagrama de sequencia "adicionar dedos"
 	public void efetuaAdicaoDedos(Mao maoOrigem, Mao maoDestino) {
 		int somaDedos = maoOrigem.getDedos() + maoDestino.getDedos();
 		Jogador jogador = MainController.getInstance().getArena().getJogador(maoDestino.getJogador().getOrdem());
@@ -33,6 +34,7 @@ public class Arena {
 		}
 	}
 
+	// abaixo esta implementado o diagrama de sequencia "Avaliar Encerramento Partida"
 	public void atualizaJogadores() {
 		List<Jogador> jogadoresAtivos = new ArrayList<>();
 		for (Jogador jogador : mesa) {
@@ -47,6 +49,7 @@ public class Arena {
 		GameController.getInstance().refresh();
 	}
 
+	// abaixo esta implementado o diagrama de sequencia "dividir dedos"
 	public void efetuaDivisaoDedos(Mao maoOrigem, Mao maoDestino) {
 		Jogador jogador = getJogador(maoOrigem.getJogador().getOrdem());
 		if (!maoDestino.isViva()) {

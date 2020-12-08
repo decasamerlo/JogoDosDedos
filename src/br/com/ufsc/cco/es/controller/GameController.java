@@ -6,7 +6,6 @@ import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map.Entry;
@@ -43,6 +42,7 @@ public class GameController {
 	public Component getPanel() {
 		JPanel panel = new JPanel(new BorderLayout());
 
+		// abaixo esta implementado o diagrama de sequencia "conceder"
 		JButton button1 = new JButton("DESISTIR");
 		button1.addActionListener(new ActionListener() {
 			@Override
@@ -73,6 +73,7 @@ public class GameController {
 		label.setHorizontalAlignment(JLabel.CENTER);
 
 		try {
+			// nos dois botoes abaixo esta implementado o diagrama de sequencia "divide dedos"
 			BufferedImage imgLeftHand = ImageIO.read(ClassLoader.getSystemResource("left_1.jpg"));
 			btnLeftHand = new JButton(new ImageIcon(imgLeftHand));
 			btnLeftHand.setBackground(Color.GRAY);
@@ -144,6 +145,7 @@ public class GameController {
 
 			JPanel northPanel = new JPanel();
 
+			// Nos botoes abaixo esta implementado o diagrama de sequencia "manda dedos"
 			for (Jogador jogador : MainController.getInstance().getArena().getMesa()) {
 				if (jogador.getNome() != MainController.getInstance().getJogadorLocal().getNome()) {
 					JPanel oponente = new JPanel();
