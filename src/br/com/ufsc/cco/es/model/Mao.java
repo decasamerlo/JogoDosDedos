@@ -8,19 +8,19 @@ public class Mao implements Jogada {
 	private int dedos;
 	private boolean viva;
 	private Jogador jogador;
+	private boolean direita;
 
-	public Mao(Jogador jogador) {
+	public Mao(Jogador jogador, boolean direita) {
 		this.dedos = 1;
 		this.viva = true;
 		this.jogador = jogador;
+		this.direita = direita;
 	}
 
 	public void receberDedos(int nDedos) {
-		System.out.println("Recebendo dedos: " + nDedos);
 	}
 
 	public void mandarDedos(int nDedos) {
-		System.out.println("Mandando dedos: " + nDedos);
 	}
 
 	public int getDedos() {
@@ -45,6 +45,14 @@ public class Mao implements Jogada {
 
 	public void setJogador(Jogador jogador) {
 		this.jogador = jogador;
+	}
+
+	public boolean isDireita() {
+		return direita;
+	}
+
+	public void setDireita(boolean direita) {
+		this.direita = direita;
 	}
 
 }

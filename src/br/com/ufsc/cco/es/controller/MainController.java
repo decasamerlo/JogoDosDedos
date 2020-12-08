@@ -34,7 +34,7 @@ public class MainController {
 
 	public void start() {
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setSize(2000, 700);
+		frame.setSize(700, 400);
 		frame.setLocationRelativeTo(null);
 
 		JPanel mainPanel = new JPanel(new BorderLayout());
@@ -50,9 +50,13 @@ public class MainController {
 	}
 
 	public void conectarJogador(String servidor, Jogador jogador) {
-		JOptionPane.showMessageDialog(null, AtorNetgames.getInstance().conectar(servidor, jogador.getNome()));
-		this.jogadorLocal = jogador;
-		showConnect();
+		String retorno = AtorNetgames.getInstance().conectar(servidor, jogador.getNome());
+		if ("Sucesso: conectado a Netgames Server".equals(retorno)) {
+			this.jogadorLocal = jogador;
+			showConnect();
+		} else {
+			JOptionPane.showMessageDialog(null, retorno);
+		}
 	}
 
 	public void desconectar() {
@@ -84,6 +88,10 @@ public class MainController {
 		CardLayout cl = (CardLayout) (cards.getLayout());
 		cl.show(cards, "GAME");
 	}
+
+	public void notificar(String notificacao) {
+		JOptionPane.showMessageDialog(null, notificacao);
+	}
 	
 	public void selecionaMaoEsquerda() {
 		this.maoSelecionada = jogadorLocal.getMaoEsquerda();
@@ -95,10 +103,6 @@ public class MainController {
 	
 	public void limpaMaoSelecionada() {
 		this.maoSelecionada = null;
-	}
-
-	public void refresh() {
-		gameController.refresh();
 	}
 
 	public Arena getArena() {

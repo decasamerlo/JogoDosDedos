@@ -70,31 +70,32 @@ public class AtorNetgames implements OuvidorProxy {
 
 	@Override
 	public void finalizarPartidaComErro(String message) {
-		System.out.println("Finalizando partida com erro: " + message);
 	}
 
 	@Override
 	public void receberMensagem(String msg) {
-		System.out.println("Recebendo Mensagem: " + msg);
 	}
 
 	@Override
 	public void receberJogada(Jogada jogada) {
 		Move move = (Move) jogada;
-		System.out.println("Recebendo jogada");
-		MainController.getInstance().getArena().efetuaDivisaoDedos(move.getMaoOrigem(), move.getMaoDestino());
+		if (move.getMaoOrigem() == null || move.getMaoDestino() == null) {
+			MainController.getInstance().getArena().efetuaConcessao(MainController.getInstance().getArena().getDaVez());
+		} else if (move.getMaoOrigem().getJogador().getOrdem() == move.getMaoDestino().getJogador().getOrdem()) {
+			MainController.getInstance().getArena().efetuaDivisaoDedos(move.getMaoOrigem(), move.getMaoDestino());
+		} else {
+			MainController.getInstance().getArena().efetuaAdicaoDedos(move.getMaoOrigem(), move.getMaoDestino());
+		}
 		MainController.getInstance().getArena().passarTurno();
-		MainController.getInstance().refresh();
+		MainController.getInstance().getArena().atualizaJogadores();
 	}
 
 	@Override
 	public void tratarConexaoPerdida() {
-		System.out.println("Tratando Conexao Perdida");
 	}
 
 	@Override
 	public void tratarPartidaNaoIniciada(String message) {
-		System.out.println("Tratando partida não iniciada: " + message);
 	}
 
 	@Override
@@ -103,11 +104,11 @@ public class AtorNetgames implements OuvidorProxy {
 		MainController.getInstance().getArena().iniciarNovaPartida(posicao, adversarios);
 		MainController.getInstance().showGame();
 	}
-	
+
 	public String getNomeAdversario(Integer posicao) {
 		return proxy.obterNomeAdversario(posicao);
 	}
-	
+
 	public void enviaJogada(Jogada jogada) throws NaoJogandoException {
 		proxy.enviaJogada(jogada);
 	}

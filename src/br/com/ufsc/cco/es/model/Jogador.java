@@ -19,39 +19,48 @@ public class Jogador implements Jogada {
 		this.nome = nome;
 		this.ordem = ordem;
 		this.turno = false;
-		this.maoDireita = new Mao(this);
-		this.maoEsquerda = new Mao(this);
+		this.maoDireita = new Mao(this, true);
+		this.maoEsquerda = new Mao(this, false);
+		this.noJogo = true;
 	}
 
 	public void matarMao(Mao maoAlvo) {
-		System.out.println("Matando mão do jogador " + nome);
-		if (this.maoDireita.equals(maoAlvo)) {
-			maoDireita.setDedos(0);
-			maoDireita.setViva(false);
-		} else if (this.maoEsquerda.equals(maoAlvo)) {
-			maoEsquerda.setDedos(0);
-			maoEsquerda.setViva(false);
+		if (maoAlvo.isDireita()) {
+			this.maoDireita.setDedos(0);
+			this.maoDireita.setViva(false);
+		} else {
+			this.maoEsquerda.setDedos(0);
+			this.maoEsquerda.setViva(false);
+		}
+
+		if (!maoDireita.isViva() && !maoEsquerda.isViva()) {
+			morrer();
 		}
 	}
 
 	public void reviverMao(Mao maoAlvo) {
-		maoAlvo.setViva(true);
+		if (maoAlvo.isDireita()) {
+			this.maoDireita.setViva(true);
+		} else {
+			this.maoEsquerda.setViva(true);
+		}
 	}
 
 	public void morrer() {
-		System.out.println("Jogador " + this.getNome() + " morrendo");
+		this.maoDireita.setDedos(0);
+		this.maoDireita.setViva(false);
+		this.maoEsquerda.setDedos(0);
+		this.maoEsquerda.setViva(false);
+		this.noJogo = false;
 	}
 
 	public void iniciar() {
-		System.out.println("Iniciando " + this.getNome());
 	}
 
 	public void definirNomes(List<String> adversarios) {
-		System.out.println("Definindo Nomes");
 	}
 
 	public void definirComoPrimeiro() {
-		System.out.println("Definindo como primeiro");
 	}
 
 	public String getNome() {

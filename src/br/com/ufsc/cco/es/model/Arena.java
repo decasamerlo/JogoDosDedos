@@ -3,6 +3,7 @@ package br.com.ufsc.cco.es.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import br.com.ufsc.cco.es.controller.GameController;
 import br.com.ufsc.cco.es.controller.MainController;
 import br.com.ufsc.cco.es.rede.AtorNetgames;
 
@@ -19,72 +20,94 @@ public class Arena {
 	}
 
 	public void efetuaAdicaoDedos(Mao maoOrigem, Mao maoDestino) {
-		System.out.println("Efetuando adicao de dedos");
+		int somaDedos = maoOrigem.getDedos() + maoDestino.getDedos();
+		Jogador jogador = MainController.getInstance().getArena().getJogador(maoDestino.getJogador().getOrdem());
+		if (somaDedos == 5) {
+			jogador.matarMao(maoDestino);
+		} else {
+			if (maoDestino.isDireita()) {
+				jogador.getMaoDireita().setDedos(somaDedos);
+			} else {
+				jogador.getMaoEsquerda().setDedos(somaDedos);
+			}
+		}
 	}
 
 	public void atualizaJogadores() {
-		System.out.println("Atualizando jogadores");
+		List<Jogador> jogadoresAtivos = new ArrayList<>();
+		for (Jogador jogador : mesa) {
+			if (jogador.isNoJogo()) {
+				jogadoresAtivos.add(jogador);
+			}
+		}
+		if (jogadoresAtivos.size() == 1) {
+			vencedor = jogadoresAtivos.get(0);
+			partidaEmAndamento = false;
+		}
+		GameController.getInstance().refresh();
 	}
 
 	public void efetuaDivisaoDedos(Mao maoOrigem, Mao maoDestino) {
-		System.out.println("Efetuando divisao de dedos para o jogador " + MainController.getInstance().getJogadorLocal().getNome());
+		Jogador jogador = getJogador(maoOrigem.getJogador().getOrdem());
 		if (!maoDestino.isViva()) {
-			getJogador(maoOrigem.getJogador().getOrdem()).reviverMao(maoDestino);
+			jogador.reviverMao(maoDestino);
 		}
 		int somaDedos = maoOrigem.getDedos() + maoDestino.getDedos();
-		int div1 = somaDedos/2;
+		int div1 = somaDedos / 2;
 		int div2 = somaDedos - div1;
-		maoOrigem.setDedos(div1);
-		maoDestino.setDedos(div2);
-		getJogador(maoOrigem.getJogador().getOrdem()).matarMao(maoDestino);
+		jogador.getMaoDireita().setDedos(div1);
+		jogador.getMaoEsquerda().setDedos(div2);
+		if (div1 == 0) {
+			jogador.getMaoDireita().setViva(false);
+		}
+		if (div2 == 0) {
+			jogador.getMaoEsquerda().setViva(false);
+		}
 	}
 
 	public void avaliarEncerramento() {
-		System.out.println("Avaliando Encerramento");
 	}
 
 	public Jogador avaliarCondicaoVitoria() {
-		System.out.println("Avaliando Condicao de Vitoria");
 		return null;
 	}
 
 	public void efetuaConcessao(Jogador jogador) {
-		System.out.println("Efetuando concessao");
+		jogador.getMaoDireita().setDedos(0);
+		jogador.getMaoDireita().setViva(false);
+		jogador.getMaoEsquerda().setDedos(0);
+		jogador.getMaoEsquerda().setViva(false);
+		jogador.setNoJogo(false);
 	}
 
 	public String notificarNaoHabilitado() {
-		System.out.println("Notificando nao habilitado");
-		return null;
-	}
-
-	public String notificarConcessao() {
-		System.out.println("Notificar concessao");
-		return null;
+		return "Aguarde sua vez para jogar. Agora é a vez de " + daVez.getNome();
 	}
 
 	public void passarTurno() {
 		daVez.setTurno(false);
 		int prox = (daVez.getOrdem() % mesa.size()) + 1;
 		Jogador proxJogador = getJogador(prox);
+		while (!proxJogador.isNoJogo()) {
+			prox = (prox % mesa.size()) + 1;
+			proxJogador = getJogador(prox);
+		}
 		proxJogador.setTurno(true);
 		daVez = proxJogador;
 	}
 
 	public Mao selecionarMao() {
-		System.out.println("Selecionando Mao");
 		return null;
 	}
 
 	public int somaDedos(Mao maoOrigem, Mao maoDestino) {
-		System.out.println("Somando Dedos");
 		return 0;
 	}
 
 	public boolean encerrarHavendoPartida() {
-		System.out.println("Encerrando havendo partida");
 		return false;
 	}
-	
+
 	public void iniciarNovaPartida(int requisicao, List<String> adversarios) {
 		MainController.getInstance().getJogadorLocal().setOrdem(requisicao);
 		if (requisicao == 1) {
@@ -104,26 +127,22 @@ public class Arena {
 		}
 		partidaEmAndamento = true;
 	}
-	
+
 	public void esvaziar() {
-		System.out.println("Esvaziando");
 	}
-	
+
 	public String notificarJogadaInvalida() {
-		System.out.println("Notificando jogada invalida");
 		return null;
 	}
-	
+
 	public String notificarVitoria() {
-		System.out.println("Notificando Vitoria");
 		return null;
 	}
-	
+
 	public String notificarEmpate() {
-		System.out.println("Notificando Empate");
 		return null;
 	}
-	
+
 	public Jogador getJogador(int ordem) {
 		for (Jogador jogador : mesa) {
 			if (jogador.getOrdem() == ordem) {

@@ -29,9 +29,9 @@ import br.ufsc.inf.leobr.cliente.exception.NaoJogandoException;
 public class GameController {
 
 	private static GameController gameController;
-	private static final Logger logger = Logger.getLogger(getInstance().getClass().getName());
 	private JButton btnLeftHand;
 	private JButton btnRightHand;
+	private JLabel label;
 	private HashMap<Integer, JButton> listMaoDireitaOponentes = new HashMap<>();
 	private HashMap<Integer, JButton> listMaoEsquerdaOponentes = new HashMap<>();
 
@@ -49,7 +49,17 @@ public class GameController {
 		button1.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				System.out.println("Concedendo");
+				if (MainController.getInstance().getJogadorLocal().isTurno()) {
+					try {
+						AtorNetgames.getInstance().enviaJogada(new Move(null, null));
+						MainController.getInstance().getArena()
+								.efetuaConcessao(MainController.getInstance().getJogadorLocal());
+						MainController.getInstance().getArena().passarTurno();
+						refresh();
+					} catch (NaoJogandoException e1) {
+						e1.printStackTrace();
+					}
+				}
 			}
 		});
 
@@ -57,7 +67,11 @@ public class GameController {
 		buttons.setBackground(Color.CYAN);
 		buttons.add(button1);
 
-		JLabel label = new JLabel("SELECIONE A MÃO QUE DESEJA UTILIZAR E APÓS SELECIONE A MÃO QUE DESEJA ATACAR");
+		label = new JLabel("SELECIONE A MÃO QUE DESEJA UTILIZAR E APÓS SELECIONE A MÃO QUE DESEJA ATACAR");
+		if (!MainController.getInstance().getJogadorLocal().isTurno()) {
+			label.setText(
+					"AGUARDANDO JOGADA DO JOGADOR " + MainController.getInstance().getArena().getDaVez().getNome());
+		}
 		label.setHorizontalAlignment(JLabel.CENTER);
 
 		try {
@@ -68,7 +82,8 @@ public class GameController {
 				@Override
 				public void actionPerformed(ActionEvent e) {
 					if (MainController.getInstance().getJogadorLocal().isTurno()) {
-						if (MainController.getInstance().getMaoSelecionada() == null) {
+						if (MainController.getInstance().getMaoSelecionada() == null
+								&& MainController.getInstance().getJogadorLocal().getMaoEsquerda().getDedos() != 0) {
 							MainController.getInstance().selecionaMaoEsquerda();
 						} else if (MainController.getInstance().getMaoSelecionada() == MainController.getInstance()
 								.getJogadorLocal().getMaoDireita()) {
@@ -86,15 +101,12 @@ public class GameController {
 							MainController.getInstance().limpaMaoSelecionada();
 						}
 					} else {
-						JOptionPane.showMessageDialog(null, "Aguarde sua vez para jogar. Agora é a vez de "
-								+ MainController.getInstance().getArena().getDaVez().getNome());
+						MainController.getInstance()
+								.notificar(MainController.getInstance().getArena().notificarNaoHabilitado());
 					}
 					refresh();
 				}
 			});
-			if (!MainController.getInstance().getJogadorLocal().getMaoEsquerda().isViva()) {
-				btnLeftHand.setVisible(false);
-			}
 
 			BufferedImage imgRightHand = ImageIO.read(new File("src/resources/images/right_1.jpg"));
 			btnRightHand = new JButton(new ImageIcon(imgRightHand));
@@ -103,7 +115,8 @@ public class GameController {
 				@Override
 				public void actionPerformed(ActionEvent e) {
 					if (MainController.getInstance().getJogadorLocal().isTurno()) {
-						if (MainController.getInstance().getMaoSelecionada() == null) {
+						if (MainController.getInstance().getMaoSelecionada() == null
+								&& MainController.getInstance().getJogadorLocal().getMaoDireita().getDedos() != 0) {
 							MainController.getInstance().selecionaMaoDireita();
 						} else if (MainController.getInstance().getMaoSelecionada() == MainController.getInstance()
 								.getJogadorLocal().getMaoEsquerda()) {
@@ -121,18 +134,15 @@ public class GameController {
 							MainController.getInstance().limpaMaoSelecionada();
 						}
 					} else {
-						JOptionPane.showMessageDialog(null, "Aguarde sua vez para jogar. Agora é a vez de "
-								+ MainController.getInstance().getArena().getDaVez().getNome());
+						MainController.getInstance()
+								.notificar(MainController.getInstance().getArena().notificarNaoHabilitado());
 					}
 					refresh();
 				}
 			});
-			if (!MainController.getInstance().getJogadorLocal().getMaoDireita().isViva()) {
-				btnRightHand.setVisible(false);
-			}
 
 			JLabel labelNome = new JLabel(MainController.getInstance().getJogadorLocal().getNome());
-			label.setHorizontalAlignment(JLabel.CENTER);
+			labelNome.setHorizontalAlignment(JLabel.CENTER);
 
 			JPanel northPanel = new JPanel();
 
@@ -145,15 +155,36 @@ public class GameController {
 					btnOponentLeftHand.addActionListener(new ActionListener() {
 						@Override
 						public void actionPerformed(ActionEvent e) {
-							logger.log(Level.SEVERE, "Mão esquerda do oponente selecionada.", e);
-							JOptionPane.showMessageDialog(null, "Agora aguarde o oponente realizar sua jogada.",
-									"Atacou!", JOptionPane.INFORMATION_MESSAGE);
+							if (MainController.getInstance().getJogadorLocal().isTurno()) {
+								if (MainController.getInstance().getMaoSelecionada() == null) {
+									JOptionPane.showMessageDialog(null, "Selecione a sua mão primeiro");
+								} else {
+									try {
+										Mao maoOrigem = MainController.getInstance().getMaoSelecionada();
+										Mao maoDestino = jogador.getMaoEsquerda();
+										int somaDedos = maoOrigem.getDedos() + maoDestino.getDedos();
+										if (somaDedos <= 5 && maoDestino.getDedos() != 0) {
+											AtorNetgames.getInstance().enviaJogada(new Move(maoOrigem, maoDestino));
+											MainController.getInstance().getArena().efetuaAdicaoDedos(maoOrigem,
+													maoDestino);
+											MainController.getInstance().getArena().passarTurno();
+										} else {
+											JOptionPane.showMessageDialog(null, "Jogada inválida");
+										}
+										MainController.getInstance().limpaMaoSelecionada();
+									} catch (NaoJogandoException e1) {
+										e1.printStackTrace();
+									}
+									refresh();
+								}
+							} else {
+								JOptionPane.showMessageDialog(null, "Aguarde sua vez para jogar");
+							}
 						}
 					});
 					listMaoEsquerdaOponentes.put(jogador.getOrdem(), btnOponentLeftHand);
 
-					BufferedImage imgOpponentRightHand = ImageIO
-							.read(new File("src/resources/images/opp_right_1.jpg"));
+					BufferedImage imgOpponentRightHand = ImageIO.read(new File("src/resources/images/opp_right_1.jpg"));
 					JButton btnOponentRightHand = new JButton(new ImageIcon(imgOpponentRightHand));
 					btnOponentRightHand.setBackground(Color.GRAY);
 					btnOponentRightHand.addActionListener(new ActionListener() {
@@ -164,16 +195,26 @@ public class GameController {
 									JOptionPane.showMessageDialog(null, "Selecione a sua mão primeiro");
 								} else {
 									try {
-										AtorNetgames.getInstance().enviaJogada(null);
+										Mao maoOrigem = MainController.getInstance().getMaoSelecionada();
+										Mao maoDestino = jogador.getMaoDireita();
+										int somaDedos = maoOrigem.getDedos() + maoDestino.getDedos();
+										if (somaDedos <= 5 && maoDestino.getDedos() != 0) {
+											AtorNetgames.getInstance().enviaJogada(new Move(maoOrigem, maoDestino));
+											MainController.getInstance().getArena().efetuaAdicaoDedos(maoOrigem,
+													maoDestino);
+											MainController.getInstance().getArena().passarTurno();
+										} else {
+											JOptionPane.showMessageDialog(null, "Jogada inválida");
+										}
+										MainController.getInstance().limpaMaoSelecionada();
 									} catch (NaoJogandoException e1) {
 										e1.printStackTrace();
 									}
-									MainController.getInstance().getArena().passarTurno();
+									refresh();
 								}
 							} else {
 								JOptionPane.showMessageDialog(null, "Aguarde sua vez para jogar");
 							}
-							refresh();
 						}
 					});
 					listMaoDireitaOponentes.put(jogador.getOrdem(), btnOponentRightHand);
@@ -225,30 +266,42 @@ public class GameController {
 
 		try {
 			int dedosEsquerda = MainController.getInstance().getJogadorLocal().getMaoEsquerda().getDedos();
-			BufferedImage imgLeftHand = ImageIO.read(new File("src/resources/images/left_"+dedosEsquerda+".jpg"));
+			BufferedImage imgLeftHand = ImageIO.read(new File("src/resources/images/left_" + dedosEsquerda + ".jpg"));
 			btnLeftHand.setIcon(new ImageIcon(imgLeftHand));
-	
+
 			int dedosDireita = MainController.getInstance().getJogadorLocal().getMaoDireita().getDedos();
-			BufferedImage imgRightHand = ImageIO.read(new File("src/resources/images/right_"+dedosDireita+".jpg"));
+			BufferedImage imgRightHand = ImageIO.read(new File("src/resources/images/right_" + dedosDireita + ".jpg"));
 			btnRightHand.setIcon(new ImageIcon(imgRightHand));
-		
+
 			for (Entry<Integer, JButton> entry : listMaoEsquerdaOponentes.entrySet()) {
 				Jogador j = MainController.getInstance().getArena().getJogador(entry.getKey());
 				int dedosOppEsquerda = j.getMaoEsquerda().getDedos();
-				System.out.println("atualizando imagem com dedos da mao esquerda: " + dedosOppEsquerda + " do jogador " + entry.getKey() + " com nome " + j.getNome());
-				BufferedImage imgOppLeftHand = ImageIO.read(new File("src/resources/images/opp_left_"+dedosOppEsquerda+".jpg"));
+				BufferedImage imgOppLeftHand = ImageIO
+						.read(new File("src/resources/images/opp_left_" + dedosOppEsquerda + ".jpg"));
 				entry.getValue().setIcon(new ImageIcon(imgOppLeftHand));
 			}
 
 			for (Entry<Integer, JButton> entry : listMaoDireitaOponentes.entrySet()) {
 				Jogador j = MainController.getInstance().getArena().getJogador(entry.getKey());
 				int dedosOppDireita = j.getMaoDireita().getDedos();
-				System.out.println("atualizando imagem com dedos da mao direita: " + dedosOppDireita);
-				BufferedImage imgOppRightHand = ImageIO.read(new File("src/resources/images/opp_right_"+dedosOppDireita+".jpg"));
+				BufferedImage imgOppRightHand = ImageIO
+						.read(new File("src/resources/images/opp_right_" + dedosOppDireita + ".jpg"));
 				entry.getValue().setIcon(new ImageIcon(imgOppRightHand));
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
+		}
+
+		if (MainController.getInstance().getArena().getVencedor() != null) {
+			label.setText("O VENCEDOR DA PARTIDA É O JOGADOR "
+					+ MainController.getInstance().getArena().getVencedor().getNome());
+			MainController.getInstance()
+					.notificar("JOGADOR VENCEDOR: " + MainController.getInstance().getArena().getVencedor().getNome());
+		} else if (MainController.getInstance().getJogadorLocal().isTurno()) {
+			label.setText("SELECIONE A MÃO QUE DESEJA UTILIZAR E APÓS SELECIONE A MÃO QUE DESEJA ATACAR OU DIVIDIR");
+		} else {
+			label.setText(
+					"AGUARDANDO JOGADA DO JOGADOR " + MainController.getInstance().getArena().getDaVez().getNome());
 		}
 	}
 
